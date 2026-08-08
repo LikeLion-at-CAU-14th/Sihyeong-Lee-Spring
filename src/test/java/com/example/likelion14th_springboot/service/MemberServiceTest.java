@@ -46,7 +46,9 @@ public class MemberServiceTest {
                     .deposit(1000 * i)
                     .isAdmin(false)
                     .role(Role.BUYER)
+                    .age(10 + i)
                     .build();
+
 
             memberRepository.save(member);
         });
@@ -89,5 +91,25 @@ public class MemberServiceTest {
         assertThat(page.getTotalElements()).isEqualTo(30);
         assertThat(page.getTotalPages()).isEqualTo(3);
         assertThat(page.getContent().get(0).getName()).isEqualTo("user30");
+    }
+
+    @Test
+    @DisplayName("나이가 20 이상이고 이름 기준 오름차순 정렬된 페이징 결과 반환")
+    void testGetAdultMembersSortedByName() {
+        Page<Member> page = memberService.getAdultMembersSortedByName(0, 10);
+
+        // 모든 결과가 20세 이상인지 확인
+        assertThat(page.getContent()).allMatch(m -> m.getAge() >= 20);
+
+        // 이름 기준 오름차순 정렬 확인
+        List<String> names = page.getContent().stream()
+                .map(Member::getName)
+                .toList();
+        List<String> sortedNames = names.stream().sorted().toList();
+        assertThat(names).isEqualTo(sortedNames);
+
+        // user10(20세)~user30(40세) = 21명 중 첫 페이지(10개)
+        assertThat(page.getTotalElements()).isEqualTo(21);
+        assertThat(page.getContent()).hasSize(10);
     }
 }

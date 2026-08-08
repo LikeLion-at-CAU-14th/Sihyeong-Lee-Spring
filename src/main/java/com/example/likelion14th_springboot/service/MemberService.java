@@ -33,4 +33,9 @@ public class MemberService {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
         return memberRepository.findAll(pageable);
     }
+    //나이가 20이상인 member 조회, 이름을 기준으로 오름차순 정렬된 페이징 결과
+    public Page<Member> getAdultMembersSortedByName(int page, int size){
+        Pageable pageable = PageRequest.of(page, size);
+        return memberRepository.findByAgeGreaterThanEqualOrderByNameAsc(20, pageable);
+    }
 }
