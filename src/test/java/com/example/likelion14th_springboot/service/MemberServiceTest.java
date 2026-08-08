@@ -112,4 +112,16 @@ public class MemberServiceTest {
         assertThat(page.getTotalElements()).isEqualTo(21);
         assertThat(page.getContent()).hasSize(10);
     }
+
+    @Test
+    @DisplayName("이름이 주어진 값으로 시작하는 경우만 필터링")
+    void testGetMembersByNamePrefix() {
+        List<Member> members = memberService.getMembersByNamePrefix("user1");
+
+        assertThat(members).isNotEmpty();
+        assertThat(members).allMatch(m -> m.getName().startsWith("user1"));
+
+        // user1, user10~user19 => 총 11명
+        assertThat(members).hasSize(11);
+    }
 }

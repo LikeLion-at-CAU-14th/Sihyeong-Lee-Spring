@@ -38,4 +38,8 @@ public class MemberService {
         Pageable pageable = PageRequest.of(page, size);
         return memberRepository.findByAgeGreaterThanEqualOrderByNameAsc(20, pageable);
     }
+
+    public List<Member> getMembersByNamePrefix(String prefix) {
+        return memberRepository.findByNameStartingWith(prefix);
+    }
 }
