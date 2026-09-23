@@ -3,6 +3,7 @@ package com.example.likelion14th_springboot.service;
 import com.example.likelion14th_springboot.domain.Member;
 import com.example.likelion14th_springboot.domain.Product;
 import com.example.likelion14th_springboot.dto.request.ProductCreateRequestDto;
+import com.example.likelion14th_springboot.dto.request.ProductUpdateRequestDto;
 import com.example.likelion14th_springboot.dto.response.ProductResponseDto;
 import com.example.likelion14th_springboot.repository.MemberRepository;
 import com.example.likelion14th_springboot.repository.ProductRepository;
@@ -48,6 +49,28 @@ public class ProductService {
     public ProductResponseDto getProductById(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 상품이 존재하지 않습니다."));
+        return ProductResponseDto.fromEntity(product);
+    }
+
+    // 상품 정보 업데이트
+    @Transactional
+    public ProductResponseDto updateProduct(Long productId, ProductUpdateRequestDto dto) {
+        // 1. 판매자 조회
+        Member member = memberRepository.findById(dto.getMemberId())
+                .orElseThrow(() -> new IllegalArgumentException("해당 판매자가 존재하지 않습니다."));
+
+        // 2. 상품 조회
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 상품이 존재하지 않습니다."));
+
+        // 3. 본인이 등록한 상품이 맞는지 권한 검증!
+        if (!product.getSeller().getId().equals(member.getId())) {
+            throw new IllegalArgumentException("본인의 상품만 수정할 수 있습니다.");
+        }
+
+        // 4. 상품 정보 수정 -> @Transactional 내부에 있으므로 변경 감지(Dirty Checking)가 동작하여 자동 UPDATE!
+        product.update(dto.getName(), dto.getPrice(), dto.getStock(), dto.getDescription());
+
         return ProductResponseDto.fromEntity(product);
     }
 }

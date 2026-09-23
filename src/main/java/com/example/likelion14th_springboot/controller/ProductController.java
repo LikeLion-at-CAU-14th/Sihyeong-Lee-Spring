@@ -1,6 +1,7 @@
 package com.example.likelion14th_springboot.controller;
 
 import com.example.likelion14th_springboot.dto.request.ProductCreateRequestDto;
+import com.example.likelion14th_springboot.dto.request.ProductUpdateRequestDto;
 import com.example.likelion14th_springboot.dto.response.ProductResponseDto;
 import com.example.likelion14th_springboot.service.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -32,5 +33,12 @@ public class ProductController {
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponseDto> getProductById(@PathVariable Long id) {
         return ResponseEntity.ok(productService.getProductById(id));
+    }
+
+    // 특정 상품 수정: PUT http://localhost:8080/products/{id}
+    @PutMapping("/{id}")
+    public ResponseEntity<ProductResponseDto> updateProduct(@PathVariable Long id,
+                                                            @RequestBody ProductUpdateRequestDto dto) {
+        return ResponseEntity.ok(productService.updateProduct(id, dto));
     }
 }
