@@ -3,6 +3,7 @@ package com.example.likelion14th_springboot.service;
 import com.example.likelion14th_springboot.domain.Member;
 import com.example.likelion14th_springboot.domain.Product;
 import com.example.likelion14th_springboot.dto.request.ProductCreateRequestDto;
+import com.example.likelion14th_springboot.dto.request.ProductDeleteRequestDto;
 import com.example.likelion14th_springboot.dto.request.ProductUpdateRequestDto;
 import com.example.likelion14th_springboot.dto.response.ProductResponseDto;
 import com.example.likelion14th_springboot.repository.MemberRepository;
@@ -72,5 +73,25 @@ public class ProductService {
         product.update(dto.getName(), dto.getPrice(), dto.getStock(), dto.getDescription());
 
         return ProductResponseDto.fromEntity(product);
+    }
+
+    // 상품 삭제
+    @Transactional
+    public void deleteProduct(Long productId, ProductDeleteRequestDto dto) {
+        // 1. 판매자 조회
+        Member seller = memberRepository.findById(dto.getMemberId())
+                .orElseThrow(() -> new IllegalArgumentException("판매자를 찾을 수 없습니다."));
+
+        // 2. 상품 조회
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
+
+        // 3. 권한 확인 (본인 상품인지)
+        if (!product.getSeller().getId().equals(seller.getId())) {
+            throw new IllegalArgumentException("본인의 상품만 삭제할 수 있습니다.");
+        }
+
+        // 4. DB에서 상품 완전 삭제
+        productRepository.delete(product);
     }
 }
