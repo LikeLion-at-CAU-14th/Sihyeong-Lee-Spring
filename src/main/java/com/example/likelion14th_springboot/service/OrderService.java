@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class OrderService {
@@ -56,5 +58,27 @@ public class OrderService {
 
         // 7. ResponseDto로 변환하여 반환
         return OrderResponseDto.fromEntity(order, productOrders);
+    }
+
+    //구매자별 주문 목록 조회
+    @Transactional(readOnly = true)
+    public List<OrderResponseDto> getOrdersByBuyer(Long buyerId) {
+        // 1. 구매자 존재 확인
+        if (!memberRepository.existsById(buyerId)) {
+            throw new IllegalArgumentException("존재하지 않는 회원입니다.");
+        }
+
+        // 2. 주문 목록 조회 후 DTO로 변환
+        return ordersRepository.findAllByBuyer_IdOrderByCreatedAtDesc(buyerId).stream()
+                .map(order -> OrderResponseDto.fromEntity(order, order.getProductOrders().get(0)))
+                .toList();
+    }
+
+    // 단건 주문 조회
+    @Transactional(readOnly = true)
+    public OrderResponseDto getOrderById(Long orderId) {
+        Orders order = ordersRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 주문이 존재하지 않습니다."));
+        return OrderResponseDto.fromEntity(order, order.getProductOrders().get(0));
     }
 }

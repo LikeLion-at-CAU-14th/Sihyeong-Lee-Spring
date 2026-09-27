@@ -5,10 +5,9 @@ import com.example.likelion14th_springboot.dto.response.OrderResponseDto;
 import com.example.likelion14th_springboot.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,5 +20,17 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<OrderResponseDto> createOrder(@RequestBody OrderCreateRequestDto dto) {
         return ResponseEntity.ok(orderService.createOrder(dto));
+    }
+
+    // 구매자별 주문 목록 조회: GET http://localhost:8080/orders?buyerId=1
+    @GetMapping
+    public ResponseEntity<List<OrderResponseDto>> getOrdersByBuyer(@RequestParam Long buyerId) {
+        return ResponseEntity.ok(orderService.getOrdersByBuyer(buyerId));
+    }
+
+    // 단건 주문 조회: GET http://localhost:8080/orders/{orderId}
+    @GetMapping("/{orderId}")
+    public ResponseEntity<OrderResponseDto> getOrderById(@PathVariable Long orderId) {
+        return ResponseEntity.ok(orderService.getOrderById(orderId));
     }
 }
