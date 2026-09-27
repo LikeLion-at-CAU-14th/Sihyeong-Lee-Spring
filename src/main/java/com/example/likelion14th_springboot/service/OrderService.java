@@ -5,6 +5,7 @@ import com.example.likelion14th_springboot.domain.Orders;
 import com.example.likelion14th_springboot.domain.Product;
 import com.example.likelion14th_springboot.domain.mapping.ProductOrders;
 import com.example.likelion14th_springboot.dto.request.OrderCreateRequestDto;
+import com.example.likelion14th_springboot.dto.request.OrderDeleteRequestDto;
 import com.example.likelion14th_springboot.dto.request.OrderUpdateRequestDto;
 import com.example.likelion14th_springboot.dto.response.OrderResponseDto;
 import com.example.likelion14th_springboot.repository.MemberRepository;
@@ -70,7 +71,7 @@ public class OrderService {
         }
 
         // 2. 주문 목록 조회 후 DTO로 변환
-        return ordersRepository.findAllByBuyer_IdOrderByCreatedAtDesc(buyerId).stream()
+        return ordersRepository.findAllByBuyer_IdAndDeletedFalseOrderByCreatedAtDesc(buyerId).stream()
                 .map(order -> OrderResponseDto.fromEntity(order, order.getProductOrders().get(0)))
                 .toList();
     }
@@ -78,7 +79,7 @@ public class OrderService {
     // 단건 주문 조회
     @Transactional(readOnly = true)
     public OrderResponseDto getOrderById(Long orderId) {
-        Orders order = ordersRepository.findById(orderId)
+        Orders order = ordersRepository.findByIdAndDeletedFalse(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 주문이 존재하지 않습니다."));
         return OrderResponseDto.fromEntity(order, order.getProductOrders().get(0));
     }
@@ -87,7 +88,7 @@ public class OrderService {
     @Transactional
     public OrderResponseDto updateOrder(Long orderId, OrderUpdateRequestDto dto) {
         // 1. 주문 조회
-        Orders order = ordersRepository.findById(orderId)
+        Orders order = ordersRepository.findByIdAndDeletedFalse(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 주문이 존재하지 않습니다."));
 
         // 2. 본인 주문인지 권한 검증
@@ -100,5 +101,22 @@ public class OrderService {
         order.updateShippingAddress(dto.toShippingAddress());
 
         return OrderResponseDto.fromEntity(order, order.getProductOrders().get(0));
+    }
+
+    // 주문 삭제 (Soft Delete)
+    @Transactional
+    public void deleteOrder(Long orderId, OrderDeleteRequestDto dto) {
+        // 1. 삭제되지 않은 주문 조회
+        Orders order = ordersRepository.findByIdAndDeletedFalse(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 주문이 존재하지 않습니다."));
+
+        // 2. 본인 주문인지 권한 검증
+        if (!order.getBuyer().getId().equals(dto.getBuyerId())) {
+            throw new IllegalArgumentException("본인의 주문만 삭제할 수 있습니다.");
+        }
+
+        // 3. Soft Delete (COMPLETED가 아니면 엔티티에서 예외 발생)
+        //    -> delete() 쿼리가 아니라 변경 감지로 deleted = true UPDATE
+        order.delete();
     }
 }

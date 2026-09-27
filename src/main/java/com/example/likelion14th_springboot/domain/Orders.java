@@ -44,4 +44,15 @@ public class Orders extends BaseTimeEntity {
         }
         this.shippingAddress = shippingAddress;
     }
+
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean deleted; // 삭제 여부 (Soft Delete)
+
+    // 주문 삭제 (배송 완료된 주문만 가능)
+    public void delete() {
+        if (this.deliverStatus != DeliverStatus.COMPLETED) {
+            throw new IllegalStateException("배송 완료된 주문만 삭제할 수 있습니다.");
+        }
+        this.deleted = true;
+    }
 }

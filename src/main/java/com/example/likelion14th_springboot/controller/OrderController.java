@@ -1,6 +1,7 @@
 package com.example.likelion14th_springboot.controller;
 
 import com.example.likelion14th_springboot.dto.request.OrderCreateRequestDto;
+import com.example.likelion14th_springboot.dto.request.OrderDeleteRequestDto;
 import com.example.likelion14th_springboot.dto.request.OrderUpdateRequestDto;
 import com.example.likelion14th_springboot.dto.response.OrderResponseDto;
 import com.example.likelion14th_springboot.service.OrderService;
@@ -40,5 +41,13 @@ public class OrderController {
     public ResponseEntity<OrderResponseDto> updateOrder(@PathVariable Long orderId,
                                                         @RequestBody OrderUpdateRequestDto dto) {
         return ResponseEntity.ok(orderService.updateOrder(orderId, dto));
+    }
+
+    // 주문 삭제: DELETE http://localhost:8080/orders/{orderId}
+    @DeleteMapping("/{orderId}")
+    public ResponseEntity<String> deleteOrder(@PathVariable Long orderId,
+                                              @RequestBody OrderDeleteRequestDto dto) {
+        orderService.deleteOrder(orderId, dto);
+        return ResponseEntity.ok("주문이 성공적으로 삭제되었습니다.");
     }
 }
