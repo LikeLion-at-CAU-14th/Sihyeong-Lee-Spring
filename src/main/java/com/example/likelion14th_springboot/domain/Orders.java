@@ -25,7 +25,7 @@ public class Orders extends BaseTimeEntity {
     private DeliverStatus deliverStatus; // 배송상태
 
     @ManyToOne
-    @JoinColumn(name ="buyer_id")
+    @JoinColumn(name = "buyer_id")
     private Member buyer;
 
     @OneToMany(mappedBy = "orders", cascade = CascadeType.ALL)
@@ -33,4 +33,7 @@ public class Orders extends BaseTimeEntity {
 
     @OneToOne(mappedBy = "orders", cascade = CascadeType.ALL)
     private Coupon coupon;
+
+    @Embedded
+    private ShippingAddress shippingAddress; // 배송지 정보
 }
