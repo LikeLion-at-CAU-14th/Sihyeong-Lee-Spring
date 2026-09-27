@@ -36,4 +36,12 @@ public class Orders extends BaseTimeEntity {
 
     @Embedded
     private ShippingAddress shippingAddress; // 배송지 정보
+
+    // 배송 중비 중일때만 배소 정보 수정 가능
+    public void updateShippingAddress(ShippingAddress shippingAddress) {
+        if (this.deliverStatus != DeliverStatus.PREPARATION) {
+            throw new IllegalStateException("배송 준비 중인 주문만 배송정보를 수정할 수 있습니다.");
+        }
+        this.shippingAddress = shippingAddress;
+    }
 }

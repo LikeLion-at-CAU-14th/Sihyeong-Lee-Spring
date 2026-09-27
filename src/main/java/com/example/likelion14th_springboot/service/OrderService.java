@@ -5,6 +5,7 @@ import com.example.likelion14th_springboot.domain.Orders;
 import com.example.likelion14th_springboot.domain.Product;
 import com.example.likelion14th_springboot.domain.mapping.ProductOrders;
 import com.example.likelion14th_springboot.dto.request.OrderCreateRequestDto;
+import com.example.likelion14th_springboot.dto.request.OrderUpdateRequestDto;
 import com.example.likelion14th_springboot.dto.response.OrderResponseDto;
 import com.example.likelion14th_springboot.repository.MemberRepository;
 import com.example.likelion14th_springboot.repository.OrdersRepository;
@@ -79,6 +80,25 @@ public class OrderService {
     public OrderResponseDto getOrderById(Long orderId) {
         Orders order = ordersRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 주문이 존재하지 않습니다."));
+        return OrderResponseDto.fromEntity(order, order.getProductOrders().get(0));
+    }
+
+    // 주문 배송정보 수정
+    @Transactional
+    public OrderResponseDto updateOrder(Long orderId, OrderUpdateRequestDto dto) {
+        // 1. 주문 조회
+        Orders order = ordersRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 주문이 존재하지 않습니다."));
+
+        // 2. 본인 주문인지 권한 검증
+        if (!order.getBuyer().getId().equals(dto.getBuyerId())) {
+            throw new IllegalArgumentException("본인의 주문만 수정할 수 있습니다.");
+        }
+
+        // 3. 배송정보 수정 (PREPARATION이 아니면 엔티티에서 예외 발생)
+        //    -> @Transactional 내부이므로 변경 감지(Dirty Checking)로 자동 UPDATE
+        order.updateShippingAddress(dto.toShippingAddress());
+
         return OrderResponseDto.fromEntity(order, order.getProductOrders().get(0));
     }
 }
