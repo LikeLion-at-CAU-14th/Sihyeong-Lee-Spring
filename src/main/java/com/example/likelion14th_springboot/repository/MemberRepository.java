@@ -8,11 +8,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
 
-public interface MemberRepository extends JpaRepository<Member, Long>  {
-        // ?? 아기사자가 채우기
-        Optional<Member> findByEmail(String email);
+public interface MemberRepository extends JpaRepository<Member, Long> {
+    // ?? 아기사자가 채우기
+    Optional<Member> findByEmail(String email);
 
-        Page<Member> findByAgeGreaterThanEqualOrderByNameAsc(Integer age, Pageable pageable);
+    Page<Member> findByAgeGreaterThanEqualOrderByNameAsc(Integer age, Pageable pageable);
 
-        List<Member> findByNameStartingWith(String prefix);
+    List<Member> findByNameStartingWith(String prefix);
+
+    // 이름 중복 검사 쿼리
+    boolean existsByName(String name);
+
+    Optional<Member> findByName(String name);
 }
