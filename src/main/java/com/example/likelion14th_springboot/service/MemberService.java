@@ -31,6 +31,17 @@ public class MemberService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 이메일의 회원이 없습니다."));
     }
 
+    public Member login(JoinRequestDto joinRequestDto) {
+        Member member = memberRepository.findByName(joinRequestDto.getName())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        if (!bCryptPasswordEncoder.matches(joinRequestDto.getPassword(), member.getPassword())) {
+            return null;
+        }
+
+        return member;
+    }
+
     public Page<Member> getMembersByPage(int page, int size) {
         // ?? 아기사자가 채우기
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
