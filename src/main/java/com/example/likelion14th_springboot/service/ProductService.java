@@ -1,5 +1,6 @@
 package com.example.likelion14th_springboot.service;
 
+import com.example.likelion14th_springboot.config.PrincipalHandler;
 import com.example.likelion14th_springboot.domain.Member;
 import com.example.likelion14th_springboot.domain.Product;
 import com.example.likelion14th_springboot.dto.request.ProductCreateRequestDto;
@@ -93,5 +94,19 @@ public class ProductService {
 
         // 4. DB에서 상품 완전 삭제
         productRepository.delete(product);
+    }
+
+    // 내가 판매자인 상품 목록 조회
+    @Transactional(readOnly = true)
+    public List<ProductResponseDto> getMyProducts() {
+        // 1. 토큰에서 꺼낸 email로 회원 조회
+        String email = PrincipalHandler.getUsernameFromPrincipal();
+        Member seller = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+
+        // 2. 판매자의 상품 목록을 DTO로 변환
+        return productRepository.findAllBySeller_Id(seller.getId()).stream()
+                .map(ProductResponseDto::fromEntity)
+                .toList();
     }
 }
