@@ -1,0 +1,23 @@
+# 테스트 전용 설정: main의 application.yml 대신 이 파일이 사용됨 (RDS에 접근하지 않음)
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=MySQL # 테스트마다 메모리에 생성되는 H2 DB
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop # 테스트 시작 시 테이블 생성, 종료 시 삭제
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: test-client-id # 테스트용 더미 값
+            client-secret: test-client-secret # 테스트용 더미 값
+            scope:
+              - email
+              - profile
+
+jwt:
+  secret: bGlrZWxpb24tY2ktdGVzdC1vbmx5LWp3dC1zZWNyZXQta2V5LTAxMjM0NTY3ODk= # 테스트용 더미 키 (실제 키 아님)
